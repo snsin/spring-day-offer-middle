@@ -5,6 +5,7 @@ import com.onedayoffer.taskdistribution.DTO.TaskDTO;
 import com.onedayoffer.taskdistribution.DTO.TaskStatus;
 import com.onedayoffer.taskdistribution.repositories.EmployeeRepository;
 import com.onedayoffer.taskdistribution.repositories.TaskRepository;
+import com.onedayoffer.taskdistribution.repositories.entities.Employee;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -30,13 +33,20 @@ public class EmployeeService {
             Sort.Direction dir = Sort.Direction.fromString(sortDirection);
             sort = Sort.by(dir, "fio");
         }
-        Type listType = new TypeToken<List<EmployeeDTO>>() {}.getType();
+        Type listType = new TypeToken<List<EmployeeDTO>>() {
+        }.getType();
         return modelMapper.map(employeeRepository.findAllAndSort(sort), listType);
     }
 
     @Transactional
     public EmployeeDTO getOneEmployee(Integer id) {
-        throw new java.lang.UnsupportedOperationException("implement getOneEmployee");
+        if (id == null) {
+            throw new IllegalArgumentException("user id not specified");
+        }
+        Optional<Employee> employeeById = employeeRepository.findEmployeeById(id);
+        return employeeById.map(e -> modelMapper
+                        .map(e, EmployeeDTO.class))
+                .orElseThrow(() -> new NoSuchElementException("employee with id = " + id + "not found"));
     }
 
     public List<TaskDTO> getTasksByEmployeeId(Integer id) {
