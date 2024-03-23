@@ -37,10 +37,12 @@ public class EmployeeController {
 
     @PatchMapping("{id}/tasks/{taskId}/status")
     @ResponseStatus(HttpStatus.OK)
-    public void changeTaskStatus(@PathVariable Integer id
-                                          /* other PathVariable and RequestParam */ ) {
-        //TaskStatus status = TaskStatus.valueOf(newStatus);
-        //employeeService.changeTaskStatus ...
+    public void changeTaskStatus(@PathVariable Integer employeeId,
+                                 @RequestParam String newStatus,
+                                 @PathVariable Integer taskId) {
+        TaskStatus status = TaskStatus.valueOf(newStatus);
+//        employeeService.isEmployeeExitsts(employeeId)
+        employeeService.changeTaskStatus(taskId, status);
     }
 
     @PostMapping("...")
