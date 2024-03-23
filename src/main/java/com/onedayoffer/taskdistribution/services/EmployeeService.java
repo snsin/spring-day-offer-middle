@@ -8,9 +8,12 @@ import com.onedayoffer.taskdistribution.repositories.TaskRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.springframework.data.domain.Sort;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Type;
 import java.util.List;
 
 @Service
@@ -22,14 +25,13 @@ public class EmployeeService {
     private final ModelMapper modelMapper;
 
     public List<EmployeeDTO> getEmployees(@Nullable String sortDirection) {
-        throw new java.lang.UnsupportedOperationException("implement getEmployees");
-
-        // if sortDirection.isPresent() ..
-        // Sort.Direction direction = ...
-        // employees = employeeRepository.findAllAndSort(Sort.by(direction, "fio"))
-        // employees = employeeRepository.findAll()
-        // Type listType = new TypeToken<List<EmployeeDTO>>() {}.getType()
-        // List<EmployeeDTO> employeeDTOS = modelMapper.map(employees, listType)
+        Sort sort = Sort.by("fio");
+        if (sortDirection != null) {
+            Sort.Direction dir = Sort.Direction.fromString(sortDirection);
+            sort = Sort.by(dir, "fio");
+        }
+        Type listType = new TypeToken<List<EmployeeDTO>>() {}.getType();
+        return modelMapper.map(employeeRepository.findAllAndSort(sort), listType);
     }
 
     @Transactional
