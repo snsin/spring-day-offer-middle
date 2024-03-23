@@ -6,6 +6,7 @@ import com.onedayoffer.taskdistribution.DTO.TaskStatus;
 import com.onedayoffer.taskdistribution.repositories.EmployeeRepository;
 import com.onedayoffer.taskdistribution.repositories.TaskRepository;
 import com.onedayoffer.taskdistribution.repositories.entities.Employee;
+import com.onedayoffer.taskdistribution.repositories.entities.Task;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -23,6 +24,10 @@ import java.util.Optional;
 @AllArgsConstructor
 public class EmployeeService {
 
+    public static final Type taskListType = new TypeToken<List<TaskDTO>>() {
+    }.getType();
+    public static final Type employeeListType = new TypeToken<List<EmployeeDTO>>() {
+    }.getType();
     private final EmployeeRepository employeeRepository;
     private final TaskRepository taskRepository;
     private final ModelMapper modelMapper;
@@ -33,9 +38,7 @@ public class EmployeeService {
             Sort.Direction dir = Sort.Direction.fromString(sortDirection);
             sort = Sort.by(dir, "fio");
         }
-        Type listType = new TypeToken<List<EmployeeDTO>>() {
-        }.getType();
-        return modelMapper.map(employeeRepository.findAllAndSort(sort), listType);
+        return modelMapper.map(employeeRepository.findAllAndSort(sort), employeeListType);
     }
 
     @Transactional
@@ -50,7 +53,11 @@ public class EmployeeService {
     }
 
     public List<TaskDTO> getTasksByEmployeeId(Integer id) {
-        throw new java.lang.UnsupportedOperationException("implement getTasksByEmployeeId");
+        if (id == null) {
+            throw new IllegalArgumentException("employee id not specified");
+        }
+        List<Task> tasks = taskRepository.findAllByEmployeeId(id);
+        return modelMapper.map(tasks, taskListType);
     }
 
     @Transactional
